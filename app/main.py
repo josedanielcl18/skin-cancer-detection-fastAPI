@@ -8,15 +8,19 @@ import os
 
 app = FastAPI()
 
+# Mount Static Files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Instantiate Jinja2Templates to be able to render HTML files
 templates = Jinja2Templates(directory="app/templates")
-#templates = Jinja2Templates(directory=os.path.abspath(os.path.expanduser('templates')))
 
+# Get method to render index.html
 @app.get("/items", response_class=HTMLResponse)
 async def read_item(request: Request):
-    print('GET METHOD IS WORKING JOSE DANIEL')
+    #print('GET METHOD IS WORKING JOSE DANIEL')
     return templates.TemplateResponse("index.html", {"request": request})
     
+
+
 # @app.get("/items")
 # async def read_root():
 #     return {"Hello": "World"}
