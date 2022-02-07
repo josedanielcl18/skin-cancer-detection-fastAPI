@@ -1,10 +1,22 @@
 from typing import Optional
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, Form, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi import APIRouter
+
 import os
+from random import randint
+
+from fastapi.responses import FileResponse
+import uuid
+
+from app.inference import get_category, plot_category
+from datetime import datetime
+
+
+# -----------------------------------------------------------------------------------------------------------------
+# FAST API APPLICATION
 
 app = FastAPI()
 
@@ -13,13 +25,44 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 # Instantiate Jinja2Templates to be able to render HTML files
 templates = Jinja2Templates(directory="app/templates")
 
-# Get method to render index.html
-@app.get("/items", response_class=HTMLResponse)
+
+# -----------------------------------------------------------------------------------------------------------------
+ # GET AND POST METHODS
+
+# GET method to render index.html
+@app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):
     #print('GET METHOD IS WORKING JOSE DANIEL')
     return templates.TemplateResponse("index.html", {"request": request})
+
+# POST method to retreive image from the form located in index.html and render it to result.html.
+@app.post("/result")
+async def create_file(request: Request, file: UploadFile = File(...), ):
+    
+    
+    #file.filename = f"{uuid.uuid4()}"
+    contents = await file.read()  # <-- Important!
+
+    IMAGEDIR = "app/static/test_images/"
+     # example of how you can save the file
+    with open(f"{IMAGEDIR}{file.filename}", "wb") as f:
+        f.write(contents)
+    
+     # get a random file from the image directory
+    #files = os.listdir(IMAGEDIR)
+    #random_index = randint(0, len(files) - 1)
+    #path = f"{IMAGEDIR}{files[random_index]}"
+    #response = FileResponse(path)              # FileResponse expects a path and It will render the image.
     
 
+    path = f"{IMAGEDIR}{file.filename}" 
+    category = get_category(img=path)
+ 
+    return templates.TemplateResponse("result.html", {"request": request, "category":category, "current_time":file.filename,})
+
+
+# -----------------------------------------------------------------------------------------------------------------
+# SIMPLE INTRO FASTAPI
 
 # @app.get("/items")
 # async def read_root():
@@ -28,41 +71,11 @@ async def read_item(request: Request):
 # @app.get("/items/{item_id}")
 # async def read_item(item_id: int, q: Optional[str] = None):
 #     return {"item_id": item_id, "q": q}
-
-# Mount Static Files
-# app.mount("/", StaticFiles(directory="app/static", html = True), name="static")
-# templates = Jinja2Templates(directory="templates")
+# -----------------------------------------------------------------------------------------------------------------
 
 
 
 
-
-#from app.inference import get_category, plot_category
-
-# @app.post("/", response_class=HTMLResponse)
-# async def read_item(request: Request, image_file: str):
-    
-#     if 'file' not in request.files:
-#         print('File Not Uploaded')
-#         return 'File Not Uploaded'
-
-#     # Read file from upload
-#     image_file = request.files['file']
-#     # Get category of prediction
-#     category = get_category(img=file)
-#     # Plot the category
-#     now = datetime.now()
-#     current_time = now.strftime("%H-%M-%S")
-#     plot_category(image_file, current_time)
-#     # Render the result template
-#     return templates.TemplateResponse("result.html", {"category": category, "current_time": current_time})
-
-
-
-
-# @app.get("/items/{item_id}")
-# async def read_item(item_id: int, q: Optional[str] = None):
-#     return {"item_id": item_id, "q": q}
 
 
 # @app.get('/', methods=['GET', 'POST'])
