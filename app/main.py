@@ -54,7 +54,6 @@ async def create_file(request: Request, file: UploadFile = File(...), ):
     #path = f"{IMAGEDIR}{files[random_index]}"
     #response = FileResponse(path)              # FileResponse expects a path and It will render the image.
     
-
     path = f"{IMAGEDIR}{file.filename}" 
     category = get_category(img=path)
  
@@ -72,30 +71,3 @@ async def create_file(request: Request, file: UploadFile = File(...), ):
 # async def read_item(item_id: int, q: Optional[str] = None):
 #     return {"item_id": item_id, "q": q}
 # -----------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-# @app.get('/', methods=['GET', 'POST'])
-# def rock_paper_scissor():
-#     # Write the GET Method to get the index file
-#     if request.method == 'GET':
-#         return render_template('index.html')
-#     # Write the POST Method to post the results file
-#     if request.method == 'POST':
-#         print(request.files)
-#         if 'file' not in request.files:
-#             print('File Not Uploaded')
-#             return
-#         # Read file from upload
-#         file = request.files['file']
-#         # Get category of prediction
-#         category = get_category(img=file)
-#         # Plot the category
-#         now = datetime.now()
-#         current_time = now.strftime("%H-%M-%S")
-#         plot_category(file, current_time)
-#         # Render the result template
-#         return render_template('result.html', category=category, current_time=current_time)

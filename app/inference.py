@@ -48,6 +48,7 @@ def get_category(img):
     #print('input_index', input_index)
     #print('output_index', output_index)
 
+    print(img)
     input_img = read_image(img)
     input_img = np.expand_dims(input_img, axis=0)
     interpreter.resize_tensor_input(0, [1, 224, 224, 3])
@@ -60,8 +61,10 @@ def get_category(img):
     interpreter.invoke()
 
     predictions_array = interpreter.get_tensor(output_index['index'])
-    predicted_label = np.argmax(predictions_array)
-    #print(predicted_label)
+    print(predictions_array) #.round().reshape(-1)
+    #predicted_label = np.argmax(predictions_array)
+    predicted_label = int(predictions_array.round().reshape(-1))
+    print(predicted_label)
 
     #class_names = ['rock', 'paper', 'scissors']
     class_names = ['Benign', 'Malignant']
