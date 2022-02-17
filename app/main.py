@@ -11,7 +11,7 @@ from random import randint
 from fastapi.responses import FileResponse
 import uuid
 
-from app.inference import get_category, plot_category
+from app.inference import get_category, plot_category, show_heatmap
 from datetime import datetime
 
 
@@ -39,25 +39,45 @@ async def read_item(request: Request):
 @app.post("/result")
 async def create_file(request: Request, file: UploadFile = File(...), ):
     
-    
     #file.filename = f"{uuid.uuid4()}"
     contents = await file.read()  # <-- Important!
 
     IMAGEDIR = "app/static/test_images/"
-     # example of how you can save the file
-    with open(f"{IMAGEDIR}{file.filename}", "wb") as f:
+    input_image_path = f"{IMAGEDIR}{file.filename}"  # Path for input image file
+     
+     # example of how you can save the file (input image file)
+    with open(input_image_path, "wb") as f:
         f.write(contents)
     
-     # get a random file from the image directory
+    # -----------------------------------------------------------------------------------
+    # IGNORE. 
+
+    # This is code to select random images from the image directory
     #files = os.listdir(IMAGEDIR)
     #random_index = randint(0, len(files) - 1)
     #path = f"{IMAGEDIR}{files[random_index]}"
     #response = FileResponse(path)              # FileResponse expects a path and It will render the image.
+    # -----------------------------------------------------------------------------------
+     
+     # Make PREDICTIONS and get the HEATMAP
+
+    # Get predicted label for input image using tflite model
+    category = get_category(img=input_image_path) 
+    # Get predicted label for input image using gram_cam model
+    heatmap_img = show_heatmap(img=input_image_path)
+
+    # Save the heatmap image in the heatmap image path
+    heatmap_img_path = f"{IMAGEDIR}heatmap_{file.filename}"
+    heatmap_img = heatmap_img.save(heatmap_img_path)
     
-    path = f"{IMAGEDIR}{file.filename}" 
-    category = get_category(img=path)
+    # These parameters are rendered in the result.html file
+    original_image = file.filename
+    heatmap_img_name = f"heatmap_{file.filename}" 
  
-    return templates.TemplateResponse("result.html", {"request": request, "category":category, "current_time":file.filename,})
+    return templates.TemplateResponse("result.html", {"request": request, 
+                                                      "category":category, 
+                                                      "original_image":original_image,
+                                                      "heatmap_image":heatmap_img_name,})
 
 
 # -----------------------------------------------------------------------------------------------------------------
