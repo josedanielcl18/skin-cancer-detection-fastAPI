@@ -11,7 +11,7 @@ from random import randint
 from fastapi.responses import FileResponse
 import uuid
 
-from app.inference import get_category, plot_category, show_heatmap
+from app.inference import get_category, show_heatmap #plot_category,
 from datetime import datetime
 
 
@@ -62,7 +62,7 @@ async def create_file(request: Request, file: UploadFile = File(...), ):
      # Make PREDICTIONS and get the HEATMAP
 
     # Get predicted label for input image using tflite model
-    category = get_category(img=input_image_path) 
+    category, probability = get_category(img=input_image_path) 
     # Get predicted label for input image using gram_cam model
     heatmap_img = show_heatmap(img=input_image_path)
 
@@ -75,7 +75,8 @@ async def create_file(request: Request, file: UploadFile = File(...), ):
     heatmap_img_name = f"heatmap_{file.filename}" 
  
     return templates.TemplateResponse("result.html", {"request": request, 
-                                                      "category":category, 
+                                                      "category":category,
+                                                      "probability":probability, 
                                                       "original_image":original_image,
                                                       "heatmap_image":heatmap_img_name,})
 

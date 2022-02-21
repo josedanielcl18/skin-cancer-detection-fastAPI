@@ -50,7 +50,7 @@ def get_category(img):
     #print('input_index', input_index)
     #print('output_index', output_index)
 
-    print(img)
+    #print(img)
     input_img = read_image(img)
     input_img = np.expand_dims(input_img, axis=0)
     interpreter.resize_tensor_input(0, [1, 224, 224, 3])
@@ -63,32 +63,38 @@ def get_category(img):
     interpreter.invoke()
 
     predictions_array = interpreter.get_tensor(output_index['index'])
-    print(predictions_array) #.round().reshape(-1)
+    probability = round(float(predictions_array*100), 4) #.round().reshape(-1)
+    if probability <= 50:
+        probability = round(100-probability, 4)
+
     #predicted_label = np.argmax(predictions_array)
     predicted_label = int(predictions_array.round().reshape(-1))
-    print(predicted_label)
+    
+    #print(predictions_array)
+    #print(probability)
+    #print(predicted_label)
 
     #class_names = ['rock', 'paper', 'scissors']
     class_names = ['Benign', 'Malignant']
 
-    return class_names[predicted_label]
+    return class_names[predicted_label], probability
 
 
-def plot_category(img, current_time):
-    """Plot the input image
+# def plot_category(img, current_time):
+#     """Plot the input image
 
-    Args:
-        img [jpg]: image file
-    """
-    read_img = mpimg.imread(img)
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(ROOT_DIR + f'/static/test_images/{current_time}')
-    print(file_path)
+#     Args:
+#         img [jpg]: image file
+#     """
+#     read_img = mpimg.imread(img)
+#     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+#     file_path = os.path.join(ROOT_DIR + f'/static/test_images/{current_time}')
+#     print(file_path)
 
-    if os.path.exists(file_path):
-        os.remove(file_path)
+#     if os.path.exists(file_path):
+#         os.remove(file_path)
 
-    plt.imsave(file_path, read_img)
+#     plt.imsave(file_path, read_img)
 
 
 # Heatmap functions
